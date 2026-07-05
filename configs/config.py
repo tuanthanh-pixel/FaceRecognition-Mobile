@@ -1,5 +1,4 @@
 import os
-import torch
 
 # =====================================================
 # Project Root
@@ -8,12 +7,32 @@ import torch
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # =====================================================
+# Detect Environment
+# =====================================================
+
+IS_KAGGLE = os.path.exists("/kaggle/input")
+IS_COLAB = os.path.exists("/content")
+
+# =====================================================
 # Dataset
 # =====================================================
 
-CASIA_PATH = os.path.join(ROOT_DIR, "datasets", "casia-webface")
+if IS_KAGGLE:
 
-LFW_PATH = os.path.join(ROOT_DIR, "datasets", "lfw_funneled")
+    CASIA_PATH = "/kaggle/input/datasets/ntl0601/casia-webface/casia-webface"
+
+    LFW_PATH = "/kaggle/input/datasets/atulanandjha/lfwpeople/lfw_funneled"
+
+elif IS_COLAB:
+
+    # Sau này sẽ sửa nếu dùng Colab
+    CASIA_PATH = "/content/datasets/casia-webface"
+    LFW_PATH = "/content/datasets/lfw_funneled"
+
+else:
+
+    CASIA_PATH = os.path.join(ROOT_DIR, "datasets", "casia-webface")
+    LFW_PATH = os.path.join(ROOT_DIR, "datasets", "lfw_funneled")
 
 # =====================================================
 # Image
@@ -27,14 +46,15 @@ CHANNELS = 3
 # =====================================================
 
 BATCH_SIZE = 64
-
-# Windows nên để 0 để tránh lỗi DataLoader.
-# Khi chuyển sang Colab/Kaggle có thể tăng lên 2 hoặc 4.
-NUM_WORKERS = 0
-
+NUM_WORKERS = 4
 EPOCHS = 30
 
-# Tự động chọn GPU nếu có, ngược lại dùng CPU.
+# =====================================================
+# Device
+# =====================================================
+
+import torch
+
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # =====================================================
@@ -54,10 +74,9 @@ EMBEDDING_SIZE = 512
 # Checkpoint
 # =====================================================
 
-CHECKPOINT_DIR = os.path.join(ROOT_DIR, "checkpoint")
-
-# =====================================================
-# Logs
-# =====================================================
-
-LOG_DIR = os.path.join(ROOT_DIR, "logs")
+if IS_KAGGLE:
+    CHECKPOINT_DIR = "/kaggle/working/checkpoint"
+    LOG_DIR = "/kaggle/working/logs"
+else:
+    CHECKPOINT_DIR = os.path.join(ROOT_DIR, "checkpoint")
+    LOG_DIR = os.path.join(ROOT_DIR, "logs")
