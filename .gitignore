@@ -1,0 +1,24 @@
+# Dataset
+datasets/
+casia-webface/
+lfw_funneled/
+*.tgz
+*.zip
+*.tar
+
+# Virtual Environment
+.venv/
+
+# Checkpoints
+checkpoint/
+*.pth
+
+# Logs
+logs/
+
+# Python
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
