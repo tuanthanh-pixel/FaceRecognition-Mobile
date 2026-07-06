@@ -30,7 +30,8 @@ def main():
     ).to(device)
 
     optimizer = torch.optim.Adam(
-        model.parameters(),
+        list(model.parameters()) +
+        list(criterion.parameters()),
         lr=config.LEARNING_RATE,
         weight_decay=config.WEIGHT_DECAY
     )

@@ -1,4 +1,6 @@
+# ==========================
 # Dataset
+# ==========================
 datasets/
 casia-webface/
 lfw_funneled/
@@ -6,19 +8,36 @@ lfw_funneled/
 *.zip
 *.tar
 
-# Virtual Environment
-.venv/
+# ==========================
+# Python Cache
+# ==========================
+__pycache__/
+*.py[cod]
 
+# ==========================
+# Virtual Environment
+# ==========================
+.venv/
+venv/
+
+# ==========================
 # Checkpoints
+# ==========================
 checkpoint/
 *.pth
 
+# ==========================
 # Logs
+# ==========================
 logs/
 
-# Python
-__pycache__/
-*.pyc
-
+# ==========================
 # VS Code
+# ==========================
 .vscode/
+
+# ==========================
+# Operating System
+# ==========================
+.DS_Store
+Thumbs.db
