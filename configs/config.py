@@ -75,8 +75,8 @@ EMBEDDING_SIZE = 512
 # =====================================================
 
 if IS_KAGGLE:
-    CHECKPOINT_DIR = "/kaggle/working/checkpoint"
-    LOG_DIR = "/kaggle/working/logs"
+    CHECKPOINT_DIR = os.path.join(ROOT_DIR, "checkpoint")
+    LOG_DIR = os.path.join(ROOT_DIR, "logs")
 else:
     CHECKPOINT_DIR = os.path.join(ROOT_DIR, "checkpoint")
     LOG_DIR = os.path.join(ROOT_DIR, "logs")

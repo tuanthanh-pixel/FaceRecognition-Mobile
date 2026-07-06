@@ -64,6 +64,9 @@ def main():
     # Resume Training
     # =====================================
 
+    start_epoch = 0
+    start_batch = 0
+
     print("=" * 50)
     print("Checkpoint path:", checkpoint_path)
     print("Checkpoint exists:", os.path.exists(checkpoint_path))
