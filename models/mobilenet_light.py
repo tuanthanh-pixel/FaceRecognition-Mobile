@@ -1,10 +1,7 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
 
 class ConvBlock(nn.Module):
-
     def __init__(self, in_channels, out_channels, stride):
         super().__init__()
 
@@ -23,10 +20,8 @@ class ConvBlock(nn.Module):
 
     def forward(self, x):
         return self.block(x)
-
-
+    
 class DepthwiseSeparableConv(nn.Module):
-
     def __init__(self, in_channels, out_channels, stride):
         super().__init__()
 
@@ -58,8 +53,7 @@ class DepthwiseSeparableConv(nn.Module):
 
     def forward(self, x):
         return self.block(x)
-
-
+    
 class MobileNetLight(nn.Module):
 
     def __init__(self, embedding_size=512):
@@ -84,17 +78,7 @@ class MobileNetLight(nn.Module):
 
         self.pool = nn.AdaptiveAvgPool2d(1)
 
-        # Không dùng bias vì sau đó có BatchNorm1d
-        self.embedding = nn.Linear(
-            512,
-            embedding_size,
-            bias=False
-        )
-
-        # Thêm BatchNorm1d
-        self.bn = nn.BatchNorm1d(
-            embedding_size
-        )
+        self.embedding = nn.Linear(512, embedding_size)
 
     def forward(self, x):
 
@@ -106,14 +90,5 @@ class MobileNetLight(nn.Module):
 
         x = self.embedding(x)
 
-        # Chuẩn hóa embedding
-        x = self.bn(x)
-
-        # L2 Normalize
-        x = F.normalize(
-            x,
-            p=2,
-            dim=1
-        )
-
         return x
+    
