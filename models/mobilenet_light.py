@@ -1,11 +1,14 @@
 import torch
 import torch.nn as nn
 
+
 class ConvBlock(nn.Module):
+
     def __init__(self, in_channels, out_channels, stride):
         super().__init__()
 
         self.block = nn.Sequential(
+
             nn.Conv2d(
                 in_channels,
                 out_channels,
@@ -14,14 +17,19 @@ class ConvBlock(nn.Module):
                 padding=1,
                 bias=False
             ),
+
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
+
+            # V2: ReLU -> PReLU
+            nn.PReLU(out_channels)
         )
 
     def forward(self, x):
         return self.block(x)
-    
+
+
 class DepthwiseSeparableConv(nn.Module):
+
     def __init__(self, in_channels, out_channels, stride):
         super().__init__()
 
@@ -37,8 +45,11 @@ class DepthwiseSeparableConv(nn.Module):
                 groups=in_channels,
                 bias=False
             ),
+
             nn.BatchNorm2d(in_channels),
-            nn.ReLU(inplace=True),
+
+            # V2
+            nn.PReLU(in_channels),
 
             # Pointwise
             nn.Conv2d(
@@ -47,13 +58,17 @@ class DepthwiseSeparableConv(nn.Module):
                 kernel_size=1,
                 bias=False
             ),
+
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
+
+            # V2
+            nn.PReLU(out_channels)
         )
 
     def forward(self, x):
         return self.block(x)
-    
+
+
 class MobileNetLight(nn.Module):
 
     def __init__(self, embedding_size=512):
@@ -78,7 +93,10 @@ class MobileNetLight(nn.Module):
 
         self.pool = nn.AdaptiveAvgPool2d(1)
 
-        self.embedding = nn.Linear(512, embedding_size)
+        self.embedding = nn.Linear(
+            512,
+            embedding_size
+        )
 
     def forward(self, x):
 
@@ -91,4 +109,3 @@ class MobileNetLight(nn.Module):
         x = self.embedding(x)
 
         return x
-    
