@@ -68,7 +68,7 @@ evaluator = Evaluator(
 correct = 0
 total = len(dataset)
 
-threshold = 0.5
+threshold = 0.7
 
 positive_similarity = []
 negative_similarity = []
