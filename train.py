@@ -9,11 +9,38 @@ from losses.arcface import ArcFace
 from trainer.trainer import Trainer
 
 
+# =====================================================
+# In cấu hình thí nghiệm
+# =====================================================
+
+def print_config():
+
+    print("=" * 60)
+    print("Experiment Configuration")
+    print("=" * 60)
+
+    print(f"Model          : MobileNetLight")
+    print(f"Embedding Size : {config.EMBEDDING_SIZE}")
+
+    print(f"Margin         : {config.ARCFACE_MARGIN}")
+    print(f"Scale          : {config.ARCFACE_SCALE}")
+
+    print(f"Learning Rate  : {config.LEARNING_RATE}")
+    print(f"Weight Decay   : {config.WEIGHT_DECAY}")
+
+    print(f"Batch Size     : {config.BATCH_SIZE}")
+    print(f"Epochs         : {config.EPOCHS}")
+
+    print("=" * 60)
+
+
 def main():
 
     device = config.DEVICE
 
     print("Device:", device)
+
+    print_config()
 
     train_loader = get_train_loader()
 
@@ -26,7 +53,9 @@ def main():
 
     criterion = ArcFace(
         embedding_size=config.EMBEDDING_SIZE,
-        num_classes=train_loader.dataset.num_classes
+        num_classes=train_loader.dataset.num_classes,
+        margin=config.ARCFACE_MARGIN,
+        scale=config.ARCFACE_SCALE
     ).to(device)
 
     optimizer = torch.optim.Adam(
@@ -106,17 +135,28 @@ def main():
         print("=" * 50)
         print(f"Epoch {epoch+1}/{config.EPOCHS}")
 
-        # ĐÃ SỬA
         loss = trainer.train_one_epoch(epoch)
 
         print(f"Average Loss: {loss:.4f}")
 
         checkpoint = {
+
             "epoch": epoch + 1,
             "batch": 0,
+
             "model_state_dict": model.state_dict(),
             "optimizer_state_dict": optimizer.state_dict(),
+
             "loss": loss,
+
+            # Hyperparameters
+            "margin": config.ARCFACE_MARGIN,
+            "scale": config.ARCFACE_SCALE,
+            "learning_rate": config.LEARNING_RATE,
+            "weight_decay": config.WEIGHT_DECAY,
+            "batch_size": config.BATCH_SIZE,
+            "embedding_size": config.EMBEDDING_SIZE
+
         }
 
         # checkpoint mới nhất
@@ -134,13 +174,36 @@ def main():
             )
         )
 
-        # log
+        # =====================================
+        # Log
+        # =====================================
+
         with open(log_path, "a") as f:
+
+            if epoch == start_epoch:
+
+                f.write("\n")
+                f.write("=" * 60 + "\n")
+                f.write("Experiment Configuration\n")
+                f.write("=" * 60 + "\n")
+
+                f.write(f"Margin        : {config.ARCFACE_MARGIN}\n")
+                f.write(f"Scale         : {config.ARCFACE_SCALE}\n")
+                f.write(f"Learning Rate : {config.LEARNING_RATE}\n")
+                f.write(f"Weight Decay  : {config.WEIGHT_DECAY}\n")
+                f.write(f"Batch Size    : {config.BATCH_SIZE}\n")
+                f.write(f"Epochs        : {config.EPOCHS}\n")
+
+                f.write("\n")
+
             f.write(
-                f"Epoch {epoch+1}, Loss={loss:.4f}\n"
+                f"Epoch {epoch+1} | Loss = {loss:.4f}\n"
             )
 
         print("Checkpoint Saved")
+
+    print("=" * 60)
+    print("Training Finished")
 
 
 if __name__ == "__main__":
