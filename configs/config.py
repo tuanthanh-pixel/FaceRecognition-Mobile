@@ -61,7 +61,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 # ArcFace
 # =====================================================
 
-ARCFACE_MARGIN = 0.45
+ARCFACE_MARGIN = 0.5
 ARCFACE_SCALE = 64
 
 # =====================================================
