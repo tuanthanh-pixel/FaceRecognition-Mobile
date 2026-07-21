@@ -58,7 +58,11 @@ def main():
         scale=config.ARCFACE_SCALE
     ).to(device)
 
-    optimizer = torch.optim.Adam(
+    # ==========================
+    # NEW : AdamW
+    # ==========================
+
+    optimizer = torch.optim.AdamW(
         list(model.parameters()) +
         list(criterion.parameters()),
         lr=config.LEARNING_RATE,
@@ -115,6 +119,17 @@ def main():
             checkpoint["model_state_dict"]
         )
 
+        # ==========================
+        # NEW
+        # Tương thích checkpoint cũ
+        # ==========================
+
+        if "criterion_state_dict" in checkpoint:
+
+            criterion.load_state_dict(
+                checkpoint["criterion_state_dict"]
+            )
+
         optimizer.load_state_dict(
             checkpoint["optimizer_state_dict"]
         )
@@ -141,10 +156,21 @@ def main():
 
         checkpoint = {
 
+            # ==========================
+            # NEW
+            # ==========================
+            "checkpoint_version": 2,
+
             "epoch": epoch + 1,
             "batch": 0,
 
             "model_state_dict": model.state_dict(),
+
+            # ==========================
+            # NEW
+            # ==========================
+            "criterion_state_dict": criterion.state_dict(),
+
             "optimizer_state_dict": optimizer.state_dict(),
 
             "loss": loss,
