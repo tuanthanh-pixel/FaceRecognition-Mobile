@@ -1,5 +1,6 @@
 import os
 import torch
+import torch.nn.functional as F
 from tqdm import tqdm
 
 from configs import config
@@ -42,12 +43,25 @@ class Trainer:
 
             self.optimizer.zero_grad()
 
+            # ==================================
+            # Forward
+            # ==================================
+
             embeddings = self.model(images)
 
-            loss, _ = self.criterion(
+            logits = self.criterion(
                 embeddings,
                 labels
             )
+
+            loss = F.cross_entropy(
+                logits,
+                labels
+            )
+
+            # ==================================
+            # Backward
+            # ==================================
 
             loss.backward()
 
@@ -60,14 +74,16 @@ class Trainer:
             )
 
             # ==================================
-            # Lưu checkpoint mỗi 500 batch
+            # Save checkpoint mỗi 500 batch
             # ==================================
+
             if (batch_idx + 1) % 500 == 0:
 
                 checkpoint = {
                     "epoch": epoch,
                     "batch": batch_idx + 1,
                     "model_state_dict": self.model.state_dict(),
+                    "criterion_state_dict": self.criterion.state_dict(),
                     "optimizer_state_dict": self.optimizer.state_dict(),
                     "loss": loss.item(),
                 }
