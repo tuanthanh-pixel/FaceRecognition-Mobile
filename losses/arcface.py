@@ -5,6 +5,7 @@ import torch.nn.functional as F
 
 
 class ArcFace(nn.Module):
+
     def __init__(
         self,
         embedding_size=512,
@@ -12,10 +13,9 @@ class ArcFace(nn.Module):
         scale=64.0,
         margin=0.5
     ):
+
         super().__init__()
 
-        self.embedding_size = embedding_size
-        self.num_classes = num_classes
         self.scale = scale
         self.margin = margin
 
@@ -25,27 +25,58 @@ class ArcFace(nn.Module):
 
         nn.init.xavier_uniform_(self.weight)
 
+        self.update_margin_params(margin)
+
+    def update_margin_params(self, margin):
+
+        self.margin = margin
+
+        self.cos_m = math.cos(margin)
+        self.sin_m = math.sin(margin)
+
+        self.th = math.cos(math.pi - margin)
+        self.mm = math.sin(math.pi - margin) * margin
+
     def forward(self, embeddings, labels):
 
-        # Chuẩn hóa embedding và weight
         embeddings = F.normalize(embeddings)
         weight = F.normalize(self.weight)
 
-        # Cos(theta)
         cosine = F.linear(embeddings, weight)
 
-        # Góc
-        theta = torch.acos(torch.clamp(cosine, -1.0 + 1e-7, 1.0 - 1e-7))
+        cosine = torch.clamp(
+            cosine,
+            -1.0 + 1e-7,
+            1.0 - 1e-7
+        )
 
-        # Cos(theta + m)
-        target_logits = torch.cos(theta + self.margin)
+        sine = torch.sqrt(
+            1.0 - cosine.pow(2)
+        )
 
-        one_hot = F.one_hot(labels, self.num_classes).float()
+        target_logits = (
+            cosine * self.cos_m
+            -
+            sine * self.sin_m
+        )
 
-        logits = cosine * (1 - one_hot) + target_logits * one_hot
+        target_logits = torch.where(
+            cosine > self.th,
+            target_logits,
+            cosine - self.mm
+        )
+
+        one_hot = F.one_hot(
+            labels,
+            self.weight.size(0)
+        ).float()
+
+        logits = (
+            cosine * (1 - one_hot)
+            +
+            target_logits * one_hot
+        )
 
         logits *= self.scale
 
-        loss = F.cross_entropy(logits, labels)
-
-        return loss, logits
+        return logits
