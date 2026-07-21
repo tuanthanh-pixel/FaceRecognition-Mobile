@@ -68,8 +68,8 @@ ARCFACE_SCALE = 64
 # Optimizer
 # =====================================================
 
-LEARNING_RATE = 0.0005
-WEIGHT_DECAY = 5e-4
+LEARNING_RATE = 0.001
+WEIGHT_DECAY = 1e-4
 
 # =====================================================
 # Embedding
