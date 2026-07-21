@@ -7,7 +7,7 @@ from data.dataloader import get_train_loader
 from models.mobilenet_light import MobileNetLight
 from losses.arcface import ArcFace
 from trainer.trainer import Trainer
-
+from torch.optim.lr_scheduler import CosineAnnealingLR
 
 # =====================================================
 # In cấu hình thí nghiệm
@@ -67,6 +67,12 @@ def main():
         list(criterion.parameters()),
         lr=config.LEARNING_RATE,
         weight_decay=config.WEIGHT_DECAY
+    )
+    
+    scheduler = CosineAnnealingLR(
+        optimizer,
+        T_max=config.EPOCHS,
+        eta_min=1e-6
     )
 
     trainer = Trainer(
@@ -133,7 +139,15 @@ def main():
         optimizer.load_state_dict(
             checkpoint["optimizer_state_dict"]
         )
+        # Resume scheduler nếu checkpoint mới
 
+        if "scheduler_state_dict" in checkpoint:
+            
+            print("Loading scheduler...")
+            
+            scheduler.load_state_dict(
+                checkpoint["scheduler_state_dict"]
+            )
         start_epoch = checkpoint["epoch"]
 
         start_batch = checkpoint.get("batch", 0)
@@ -149,8 +163,14 @@ def main():
 
         print("=" * 50)
         print(f"Epoch {epoch+1}/{config.EPOCHS}")
-
+        
+        print(
+            f"Current LR : {optimizer.param_groups[0]['lr']:.8f}"
+        )
+        
         loss = trainer.train_one_epoch(epoch)
+        
+        scheduler.step()
 
         print(f"Average Loss: {loss:.4f}")
 
@@ -172,6 +192,8 @@ def main():
             "criterion_state_dict": criterion.state_dict(),
 
             "optimizer_state_dict": optimizer.state_dict(),
+            
+            "scheduler_state_dict": scheduler.state_dict(),
 
             "loss": loss,
 
@@ -223,7 +245,9 @@ def main():
                 f.write("\n")
 
             f.write(
-                f"Epoch {epoch+1} | Loss = {loss:.4f}\n"
+                f"Epoch {epoch+1} | "
+                f"Loss={loss:.4f} | "
+                f"LR={optimizer.param_groups[0]['lr']:.8f}\n"
             )
 
         print("Checkpoint Saved")
